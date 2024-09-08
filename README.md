@@ -1,6 +1,6 @@
 # miftahprint
 
-Printing service app MIftahPrint
+A printing service app
 
 ## Getting Started
 
