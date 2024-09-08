@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Add this for formatting the date and time
+import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share/share.dart'; // Add this for formatting the date and time
 
 class Memo extends StatefulWidget {
   const Memo({super.key});
@@ -9,6 +14,8 @@ class Memo extends StatefulWidget {
 }
 
 class _MemoState extends State<Memo> {
+  ScreenshotController screenshotController = ScreenshotController();
+
   String getFormattedDateTime() {
     final DateTime now = DateTime.now();
     final DateFormat formatter = DateFormat('dd-MM-yyyy HH:mm');
@@ -26,6 +33,7 @@ class _MemoState extends State<Memo> {
     final double totalCost = args['totalCost'];
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
@@ -34,31 +42,54 @@ class _MemoState extends State<Memo> {
         ),
         backgroundColor: Colors.teal[500],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "MiftahPrint Memo",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Screenshot(
+            controller: screenshotController,
+            child: Container(
+              padding: const EdgeInsets.all(15.0),
+              decoration: const BoxDecoration(
+                color: Colors.white
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "MiftahPrint",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  Text("Name: $name", style: const TextStyle(fontSize: 18)),
+                  const SizedBox(height: 5),
+                  Text(
+                      "Black & White Pages: ${blackAndWhitePages}×1.75৳ = ${blackAndWhitePages * 1.75}৳",
+                      style: const TextStyle(fontSize: 18)),
+                  const SizedBox(height: 5),
+                  Text("Color Pages: ${colorPages}×2.5৳ = ${colorPages * 2.5}৳",
+                      style: const TextStyle(fontSize: 18)),
+                  const SizedBox(height: 5),
+                  Text("Total Cost: $totalCost৳",
+                      style: const TextStyle(fontSize: 18)),
+                  const SizedBox(height: 20),
+                  Text("Date & Time: ${getFormattedDateTime()}",
+                      style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                ],
+              ),
             ),
-            const SizedBox(height: 10),
-            Text("Name: $name", style: const TextStyle(fontSize: 18)),
-            const SizedBox(height: 5),
-            Text("Black & White Pages: ${blackAndWhitePages}×1.75৳ = ${blackAndWhitePages*1.75}৳",
-                style: const TextStyle(fontSize: 18)),
-            const SizedBox(height: 5),
-            Text("Color Pages: ${colorPages}×2.5৳ = ${colorPages*2.5}৳",
-                style: const TextStyle(fontSize: 18)),
-            const SizedBox(height: 5),
-            Text("Total Cost: $totalCost৳",
-                style: const TextStyle(fontSize: 18)),
-            const SizedBox(height: 20),
-            Text("Date & Time: ${getFormattedDateTime()}",
-                style: const TextStyle(fontSize: 16, color: Colors.grey)),
-          ],
-        ),
+          ),
+          Center(
+            child: ElevatedButton(
+                onPressed: () async {
+                  final uint8List = await screenshotController.capture();
+                  String tempPath = (await getTemporaryDirectory()).path;
+                  File file = File('$tempPath/image.png');
+                  await file.writeAsBytes(uint8List as List<int>);
+                  await Share.shareFiles([file.path]);
+                },
+                child: const Text("Save memo")),
+          )
+        ],
       ),
     );
   }
