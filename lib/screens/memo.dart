@@ -13,65 +13,14 @@ class Memo extends StatefulWidget {
 
 class _MemoState extends State<Memo> {
   List<Map<String, dynamic>> memoList = [];
-
-  // Get formatted date and time
   String getFormattedDateTime() {
     final DateTime now = DateTime.now();
     final DateFormat formatter = DateFormat('dd-MM-yyyy HH:mm');
     return formatter.format(now);
   }
 
-  // Save memo list to a file
-  Future<void> saveMemoListToFile() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/memo_list.json');
-
-    String jsonList = jsonEncode(memoList);
-    await file.writeAsString(jsonList);
-  }
-
-  // Load memo list from a file
-  Future<void> loadMemoListFromFile() async {
-    try {
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/memo_list.json');
-
-      if (await file.exists()) {
-        String jsonList = await file.readAsString();
-        setState(() {
-          memoList = List<Map<String, dynamic>>.from(jsonDecode(jsonList));
-        });
-      }
-    } catch (e) {
-      // Handle any errors that might occur
-      print("Error loading memo list: $e");
-    }
-  }
-
-  // Function to save a memo in the list and the file
-  void saveMemo(String name, int blackAndWhitePages, int colorPages, double totalCost) {
-    setState(() {
-      memoList.add({
-        'name': name,
-        'blackAndWhitePages': blackAndWhitePages,
-        'colorPages': colorPages,
-        'totalCost': totalCost,
-        'dateTime': getFormattedDateTime(),
-      });
-    });
-
-    saveMemoListToFile(); // Save the updated list to a file
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    loadMemoListFromFile(); // Load memo list when the app starts
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Retrieve arguments
     final args =
     ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final String name = args['name'];
@@ -126,8 +75,7 @@ class _MemoState extends State<Memo> {
           Center(
             child: ElevatedButton(
                 onPressed: () {
-                  // Save the memo when the button is pressed
-                  saveMemo(name, blackAndWhitePages, colorPages, totalCost);
+
                 },
                 child: const Text("Save memo")),
           ),
